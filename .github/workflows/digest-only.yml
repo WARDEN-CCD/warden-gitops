@@ -1,0 +1,38 @@
+# DRAFT — encodes ADR-013; not yet run.
+#
+# Required status check on main. For PRs authored by the promotion bot, passes only if the PR changes exactly
+# one image digest in apps/<svc>/rollout.yaml. Human PRs pass this check and go through normal review.
+#
+# Why pull_request_target: with `pull_request`, the workflow and script would be taken from the PR head, so a
+# compromised bot token could edit this check in the same PR. pull_request_target runs the BASE branch's
+# workflow and script. It never checks out or executes PR code — the head is fetched only as data for `git diff`.
+name: digest-only
+
+on:
+  pull_request_target:  # zizmor: ignore[dangerous-triggers] -- PR code is never checked out or executed
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  digest-only:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch PR head as data
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: git fetch --no-tags origin "+refs/pull/${PR_NUMBER}/head:refs/remotes/pr/head"
+      - name: Enforce digest-only change for bot PRs
+        env:
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          ORG: ${{ github.repository_owner }}
+          BOT_LOGIN: warden-promoter[bot]
+        run: python3 .github/scripts/digest_only.py

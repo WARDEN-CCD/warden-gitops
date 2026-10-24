@@ -1,0 +1,60 @@
+# Platform components for the kind cluster, `lite` profile (hub DESIGN §13, ADR-014).
+# One Application per Helm chart. Chart versions must equal the hub's versions.yaml `charts` (verify.py checks).
+# Values: platform/<name>/values.yaml (shared) then clusters/local/values/<name>.yaml (local overrides).
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          - { name: argocd,                namespace: argocd,               repoURL: "https://argoproj.github.io/argo-helm",              chart: argo-cd,               version: "10.10.5" }
+          - { name: argo-rollouts,         namespace: argo-rollouts,        repoURL: "https://argoproj.github.io/argo-helm",              chart: argo-rollouts,         version: "2.43.8" }
+          - { name: kyverno,               namespace: kyverno,              repoURL: "https://kyverno.github.io/kyverno",                 chart: kyverno,               version: "3.9.2" }
+          - { name: envoy-gateway,         namespace: envoy-gateway-system, repoURL: "docker.io/envoyproxy",                              chart: gateway-helm,          version: "v1.9.2" }
+          - { name: kube-prometheus-stack, namespace: monitoring,           repoURL: "https://prometheus-community.github.io/helm-charts", chart: kube-prometheus-stack, version: "92.11.0" }
+          - { name: cloudnative-pg,        namespace: cnpg-system,          repoURL: "https://cloudnative-pg.github.io/charts",           chart: cloudnative-pg,        version: "0.29.1" }
+          - { name: crossplane,            namespace: crossplane-system,    repoURL: "https://charts.crossplane.io/stable",               chart: crossplane,            version: "2.4.2" }
+          - { name: k6-operator,           namespace: k6-operator-system,   repoURL: "https://grafana.github.io/helm-charts",             chart: k6-operator,           version: "4.7.0" }
+          - { name: metrics-server,        namespace: kube-system,          repoURL: "https://kubernetes-sigs.github.io/metrics-server/", chart: metrics-server,        version: "3.14.0" }
+  template:
+    metadata:
+      name: "{{ .name }}"
+      namespace: argocd
+      labels:
+        warden.dev/layer: platform
+    spec:
+      project: default
+      sources:
+        - repoURL: "{{ .repoURL }}"
+          chart: "{{ .chart }}"
+          targetRevision: "{{ .version }}"
+          helm:
+            releaseName: "{{ .name }}"
+            ignoreMissingValueFiles: true
+            valueFiles:
+              - "$values/platform/{{ .name }}/values.yaml"
+              - "$values/clusters/local/values/{{ .name }}.yaml"
+        - repoURL: https://github.com/WARDEN-CCD/warden-gitops.git
+          targetRevision: main
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ .namespace }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+        retry:
+          limit: 10
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m

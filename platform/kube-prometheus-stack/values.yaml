@@ -1,0 +1,15 @@
+alertmanager:
+  enabled: false                      # lite profile: alerts surface on dashboards only
+grafana:
+  defaultDashboardsTimezone: browser
+  sidecar:
+    dashboards:
+      searchNamespace: ALL            # dashboards ship as ConfigMaps labelled grafana_dashboard=1 (warden-platform)
+prometheus:
+  prometheusSpec:
+    retention: 3d
+    # Pick up ServiceMonitors/PodMonitors/rules from every namespace, not only this chart's.
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false

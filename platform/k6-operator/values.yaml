@@ -1,0 +1,2 @@
+namespace:
+  create: false                       # Argo CD creates the namespace (CreateNamespace=true)

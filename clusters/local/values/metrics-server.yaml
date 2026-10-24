@@ -1,0 +1,3 @@
+# kind kubelets serve self-signed certificates.
+args:
+  - --kubelet-insecure-tls

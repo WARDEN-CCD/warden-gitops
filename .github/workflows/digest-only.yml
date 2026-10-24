@@ -34,5 +34,5 @@ jobs:
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           ORG: ${{ github.repository_owner }}
-          BOT_LOGIN: warden-promoter[bot]
+          BOT_LOGIN: warden-ccd-promoter[bot]   # GitHub App created by `warden setup-apps`
         run: python3 .github/scripts/digest_only.py

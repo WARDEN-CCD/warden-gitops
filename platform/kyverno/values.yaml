@@ -1,6 +1,8 @@
 # Single replica per controller: availability is a stated non-goal (THREAT_MODEL residual risk 1).
 admissionController:
   replicas: 1
+  serviceMonitor:
+    enabled: true   # admission metrics for the dashboard and E8
 backgroundController:
   replicas: 1
 cleanupController:

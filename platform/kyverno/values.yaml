@@ -7,3 +7,8 @@ cleanupController:
   replicas: 1
 reportsController:
   replicas: 1
+# The kyverno-api subchart renders `labels: {}` on its CRDs when no labels are set; the API server drops the
+# empty map, so Argo CD reported 11 CRDs OutOfSync forever. A real label removes the empty map.
+kyverno-api:
+  labels:
+    app.kubernetes.io/part-of: kyverno

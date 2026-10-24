@@ -49,6 +49,9 @@ spec:
         automated:
           prune: true
           selfHeal: true
+        managedNamespaceMetadata:
+          labels:
+            warden.dev/monitored: "true"   # Prometheus only discovers monitors in labelled namespaces
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true

@@ -1,0 +1,26 @@
+# Argo Rollouts rewrites both selectors with the stable/canary pod-template hash.
+apiVersion: v1
+kind: Service
+metadata:
+  name: notify-stable
+  namespace: svc-notify
+spec:
+  selector:
+    app.kubernetes.io/name: notify
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notify-canary
+  namespace: svc-notify
+spec:
+  selector:
+    app.kubernetes.io/name: notify
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

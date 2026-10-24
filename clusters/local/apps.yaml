@@ -20,7 +20,7 @@ spec:
       labels:
         warden.dev/layer: apps
     spec:
-      project: default
+      project: apps          # platform/projects/apps.yaml: svc-* namespaces only, no RBAC kinds
       source:
         repoURL: https://github.com/WARDEN-CCD/warden-gitops.git
         targetRevision: main

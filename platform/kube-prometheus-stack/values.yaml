@@ -2,14 +2,33 @@ alertmanager:
   enabled: false                      # lite profile: alerts surface on dashboards only
 grafana:
   defaultDashboardsTimezone: browser
+  # Admin credentials come from a Secret created at bootstrap with a random password (warden-infra
+  # scripts/bootstrap_secrets.py); a copy is kept only in ~/.warden/. Never the chart's default password.
+  admin:
+    existingSecret: grafana-admin
+    userKey: admin-user
+    passwordKey: admin-password
   sidecar:
     dashboards:
-      searchNamespace: ALL            # dashboards ship as ConfigMaps labelled grafana_dashboard=1 (warden-platform)
+      searchNamespace: monitoring     # dashboards ship as ConfigMaps in this namespace only (warden-platform)
 prometheus:
   prometheusSpec:
     retention: 3d
-    # Pick up ServiceMonitors/PodMonitors/rules from every namespace, not only this chart's.
+    # Discover ServiceMonitors/PodMonitors/rules only in namespaces labelled warden.dev/monitored=true
+    # (platform namespaces via managedNamespaceMetadata, service namespaces via their namespace.yaml).
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
     ruleSelectorNilUsesHelmValues: false
     probeSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector:
+      matchLabels:
+        warden.dev/monitored: "true"
+    podMonitorNamespaceSelector:
+      matchLabels:
+        warden.dev/monitored: "true"
+    ruleNamespaceSelector:
+      matchLabels:
+        warden.dev/monitored: "true"
+    probeNamespaceSelector:
+      matchLabels:
+        warden.dev/monitored: "true"

@@ -1,0 +1,12 @@
+# kind: control-plane components are not scrapeable from inside the cluster.
+kubeEtcd:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+prometheus-node-exporter:
+  hostRootFsMount:
+    enabled: false                    # Docker Desktop/WSL2 does not support rslave mount propagation

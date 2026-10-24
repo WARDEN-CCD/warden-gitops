@@ -1,0 +1,43 @@
+# One Application per service directory under apps/ (created by `warden new`). Namespace svc-<name>.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/WARDEN-CCD/warden-gitops.git
+        revision: main
+        directories:
+          - path: apps/*
+  template:
+    metadata:
+      name: "svc-{{ .path.basename }}"
+      namespace: argocd
+      labels:
+        warden.dev/layer: apps
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/WARDEN-CCD/warden-gitops.git
+        targetRevision: main
+        path: "{{ .path.path }}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "svc-{{ .path.basename }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 3m

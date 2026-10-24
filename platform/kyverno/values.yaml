@@ -1,0 +1,9 @@
+# Single replica per controller: availability is a stated non-goal (THREAT_MODEL residual risk 1).
+admissionController:
+  replicas: 1
+backgroundController:
+  replicas: 1
+cleanupController:
+  replicas: 1
+reportsController:
+  replicas: 1

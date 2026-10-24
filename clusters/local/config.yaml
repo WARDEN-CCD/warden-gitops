@@ -1,0 +1,51 @@
+# Git-sourced configuration for the kind cluster. Each repo owns its content (hub DESIGN §8, ADR-001);
+# this repo only points at it. Custom resources whose CRDs come from the platform charts are applied with
+# SkipDryRunOnMissingResource and retried until those CRDs exist.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: config
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          - { name: policies,       repo: warden-policy,   path: policies,              namespace: kyverno }
+          - { name: crossplane-api, repo: warden-infra,    path: crossplane,            namespace: crossplane-system }
+          - { name: observability,  repo: warden-platform, path: observability,         namespace: monitoring }
+          - { name: gateway,        repo: warden-gitops,   path: platform/gateway,      namespace: envoy-gateway-system }
+          - { name: local-config,   repo: warden-gitops,   path: clusters/local/config, namespace: argocd }
+  template:
+    metadata:
+      name: "{{ .name }}"
+      namespace: argocd
+      labels:
+        warden.dev/layer: config
+    spec:
+      project: default
+      source:
+        repoURL: "https://github.com/WARDEN-CCD/{{ .repo }}.git"
+        targetRevision: main
+        path: "{{ .path }}"
+        directory:
+          recurse: true
+          include: "{*.yaml,*.yml}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ .namespace }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+          - SkipDryRunOnMissingResource=true
+        retry:
+          limit: 20
+          backoff:
+            duration: 15s
+            factor: 2
+            maxDuration: 5m

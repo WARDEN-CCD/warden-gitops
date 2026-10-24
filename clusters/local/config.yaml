@@ -17,6 +17,7 @@ spec:
           - { name: observability,  repo: warden-platform, path: observability,         namespace: monitoring }
           - { name: gateway,        repo: warden-gitops,   path: platform/gateway,      namespace: envoy-gateway-system }
           - { name: projects,       repo: warden-gitops,   path: platform/projects,     namespace: argocd }
+          - { name: load,           repo: warden-platform, path: load,                  namespace: k6-operator-system }
           - { name: local-config,   repo: warden-gitops,   path: clusters/local/config, namespace: argocd }
   template:
     metadata:

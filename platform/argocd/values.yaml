@@ -5,6 +5,17 @@ configs:
   cm:
     timeout.reconciliation: 60s      # ADR-014: poll Git every minute (no inbound webhook into local clusters)
     application.resourceTrackingMethod: annotation
+    # Controllers (Kyverno, CNPG, Envoy Gateway, ...) inject TLS caBundles into their CRD conversion webhooks and
+    # webhook configurations at runtime. Ignore those fields so self-heal does not fight the controllers.
+    resource.customizations.ignoreDifferences.apiextensions.k8s.io_CustomResourceDefinition: |
+      jqPathExpressions:
+        - .spec.conversion.webhook.clientConfig.caBundle
+    resource.customizations.ignoreDifferences.admissionregistration.k8s.io_ValidatingWebhookConfiguration: |
+      jqPathExpressions:
+        - .webhooks[]?.clientConfig.caBundle
+    resource.customizations.ignoreDifferences.admissionregistration.k8s.io_MutatingWebhookConfiguration: |
+      jqPathExpressions:
+        - .webhooks[]?.clientConfig.caBundle
 dex:
   enabled: false
 notifications:

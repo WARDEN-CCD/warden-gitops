@@ -55,6 +55,7 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+          - RespectIgnoreDifferences=true   # keep runtime-injected caBundles (argocd values)
         retry:
           limit: 10
           backoff:

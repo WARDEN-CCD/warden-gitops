@@ -12,6 +12,9 @@ spec:
         replicas: 1
       envoyService:
         type: NodePort
+        # kind publishes 18080 on the control-plane node, while Envoy runs on the worker. The default (Local)
+        # drops NodePort traffic on nodes without an Envoy pod, so connections from the host hung.
+        externalTrafficPolicy: Cluster
         patch:
           type: StrategicMerge
           value:

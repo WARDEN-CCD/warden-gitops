@@ -2,8 +2,8 @@
 configs:
   params:
     server.insecure: true            # reached via `kubectl port-forward` only; never exposed through the gateway
-    # Diff through the API server (pairs with ServerSideApply). Without it, charts that render empty maps
-    # (Kyverno's CRDs: `labels: {}`) stay OutOfSync forever. CVE-2026-45737 (ServerSideDiff) is fixed in 3.4.2+.
+    # Diff through the API server, which matches the ServerSideApply sync option (defaulted fields and
+    # admission mutations are seen as the server sees them). CVE-2026-45737 (ServerSideDiff) is fixed in 3.4.2+.
     controller.diff.server.side: "true"
   cm:
     timeout.reconciliation: 60s      # ADR-014: poll Git every minute (no inbound webhook into local clusters)

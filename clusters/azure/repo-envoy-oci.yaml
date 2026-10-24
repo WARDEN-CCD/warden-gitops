@@ -1,0 +1,13 @@
+# Argo CD repository entry for Envoy Gateway's OCI Helm chart. Public registry: no credentials.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: repo-envoyproxy-oci
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  type: helm
+  name: envoyproxy
+  url: docker.io/envoyproxy
+  enableOCI: "true"

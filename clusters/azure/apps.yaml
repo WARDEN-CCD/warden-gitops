@@ -1,0 +1,56 @@
+# One Application per service directory under apps/ (created by `warden new`). Namespace svc-<name>.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/WARDEN-CCD/warden-gitops.git
+        revision: main
+        directories:
+          - path: apps/*
+  template:
+    metadata:
+      name: "svc-{{ .path.basename }}"
+      namespace: argocd
+      labels:
+        warden.dev/layer: apps
+    spec:
+      project: apps          # platform/projects/apps.yaml: svc-* namespaces only, no RBAC kinds
+      source:
+        repoURL: https://github.com/WARDEN-CCD/warden-gitops.git
+        targetRevision: main
+        path: "{{ .path.path }}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "svc-{{ .path.basename }}"
+      # Argo Rollouts owns two fields during a rollout (ADR-012): the pod-template hash in the stable/canary
+      # Service selectors, and the HTTPRoute backend weights (Gateway API plugin). Both are atomic, so a forced
+      # server-side apply would put Git's values back mid-rollout and split traffic by pod count instead of weight.
+      ignoreDifferences:
+        - group: ""
+          kind: Service
+          jsonPointers:
+            - /spec/selector/rollouts-pod-template-hash
+        - group: gateway.networking.k8s.io
+          kind: HTTPRoute
+          jsonPointers:
+            - /spec/rules/0/backendRefs
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+          - RespectIgnoreDifferences=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 3m

@@ -1,0 +1,26 @@
+# Argo Rollouts rewrites both selectors with the stable/canary pod-template hash.
+apiVersion: v1
+kind: Service
+metadata:
+  name: loans-stable
+  namespace: svc-loans
+spec:
+  selector:
+    app.kubernetes.io/name: loans
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loans-canary
+  namespace: svc-loans
+spec:
+  selector:
+    app.kubernetes.io/name: loans
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

@@ -1,0 +1,13 @@
+controller:
+  replicas: 1
+  # Gateway API traffic router (ADR-012). Downloaded by the controller at start-up and checked against sha256.
+  trafficRouterPlugins:
+    - name: argoproj-labs/gatewayAPI
+      location: https://github.com/argoproj-labs/rollouts-plugin-trafficrouter-gatewayapi/releases/download/v0.17.0/gatewayapi-plugin-linux-amd64
+      sha256: 1904ca787d33107c140521899d61fff030ee75d99908bd175fca5a4647759061   # computed 2026-10-24; release has no checksum file
+providerRBAC:
+  enabled: true
+  providers:
+    gatewayAPI: true
+dashboard:
+  enabled: false

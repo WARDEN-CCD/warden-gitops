@@ -1,0 +1,11 @@
+# Argo CD manages itself after `task up:local` installs it once with these same values (release name `argocd`).
+configs:
+  params:
+    server.insecure: true            # reached via `kubectl port-forward` only; never exposed through the gateway
+  cm:
+    timeout.reconciliation: 60s      # ADR-014: poll Git every minute (no inbound webhook into local clusters)
+    application.resourceTrackingMethod: annotation
+dex:
+  enabled: false
+notifications:
+  enabled: false                     # switched on with the DORA ledger (ADR-019)

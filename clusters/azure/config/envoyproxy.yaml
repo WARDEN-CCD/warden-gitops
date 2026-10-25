@@ -1,0 +1,16 @@
+# AKS: expose the gateway through an Azure load balancer. Only /api of the sample services is routed
+# (template HTTPRoute); Argo CD, Grafana and Prometheus stay ClusterIP and are reached by port-forward.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: warden
+  namespace: envoy-gateway-system
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyDeployment:
+        replicas: 1
+      envoyService:
+        name: warden-gateway       # stable in-cluster name (k6 load, warden-platform/load)
+        type: LoadBalancer

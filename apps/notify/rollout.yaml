@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: app
-          image: ghcr.io/warden-ccd/svc-notify@sha256:b72b036263dfdd4809e4c38b7b5b0395ad4f53d3cc927b6c3f765681993849fc
+          image: ghcr.io/warden-ccd/svc-notify@sha256:6ac25a2ac2ab7e92644b9a93fc122d017a1a8cf01fe649f58d64b9453427a554
           ports:
             - name: http
               containerPort: 8080

@@ -27,7 +27,7 @@ spec:
       labels:
         warden.dev/layer: platform
     spec:
-      project: default
+      project: platform     # platform/projects/platform.yaml: pinned chart repos, chart namespaces (hub ADR-029)
       sources:
         - repoURL: "{{ .repoURL }}"
           chart: "{{ .chart }}"

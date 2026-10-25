@@ -1,0 +1,10 @@
+# AKS: the control plane is managed, so etcd, controller-manager and scheduler cannot be scraped; the Cilium
+# dataplane (warden-infra modules/aks) replaces kube-proxy.
+kubeEtcd:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false

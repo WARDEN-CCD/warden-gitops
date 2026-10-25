@@ -1,12 +1,34 @@
 # Root of the app-of-apps for the kind cluster (ADR-014). Applied once by `task up:local` in warden-infra;
 # everything else is reconciled from Git.
+# The root Application cannot sync before its project exists, so this file creates it first: a copy of
+# platform/projects/root.yaml, which the `projects` Application owns afterwards (hub ADR-029; verify.py checks
+# that the copies are equal).
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: root
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  description: Root Application and the AppProjects (warden-gitops only)
+  sourceRepos:
+    - https://github.com/WARDEN-CCD/warden-gitops.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: argocd
+  namespaceResourceWhitelist:
+    - { group: argoproj.io, kind: ApplicationSet }
+    - { group: argoproj.io, kind: AppProject }
+    - { group: "",          kind: Secret }
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: root
   namespace: argocd
 spec:
-  project: default
+  project: root
   source:
     repoURL: https://github.com/WARDEN-CCD/warden-gitops.git
     targetRevision: main

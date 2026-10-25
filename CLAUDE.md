@@ -11,4 +11,6 @@ This repo **is** the cluster's desired state; Argo CD applies it. Workspace rule
 - The `digest-only` workflow uses `pull_request_target` on purpose and must never check out or run PR code.
   Keep the script stdlib-only.
 - Every Application: `automated: {prune: true, selfHeal: true}` and a sync-wave annotation.
+- Every Application names a project from `platform/projects/` (one per source repo, hub ADR-029), never
+  `default`, which is locked. A new kind, name or namespace for a source means editing its project in the same PR.
 - Cluster differences live in `clusters/<name>/` overlays only; `platform/` stays cluster-agnostic.

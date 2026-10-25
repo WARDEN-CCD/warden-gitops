@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: app
-          image: ghcr.io/warden-ccd/svc-loans@sha256:70158e8ec19de6007e4d0d8beded8e977eba2f03b8329eccf10f8f019596edc0
+          image: ghcr.io/warden-ccd/svc-loans@sha256:69f2662c5eee68f7470a0bd198290947152d6a83fd0af246ca873f993e76389c
           ports:
             - name: http
               containerPort: 8080

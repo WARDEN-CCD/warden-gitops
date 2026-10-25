@@ -1,0 +1,22 @@
+# AppProject for the `crossplane-api` Application (hub ADR-029): Crossplane APIs from warden-infra.
+# Kinds are the ones the Application manages on kind (2026-10-25). The ClusterRole lets Crossplane manage what a
+# Composition composes; its name is pinned, but Argo CD does not limit its rules (ADR-029, limit 1).
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: warden-infra
+  namespace: argocd
+spec:
+  description: Crossplane XRDs, Compositions and Functions from warden-infra
+  sourceRepos:
+    - https://github.com/WARDEN-CCD/warden-infra.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: crossplane-system
+  clusterResourceWhitelist:
+    - { group: apiextensions.crossplane.io, kind: CompositeResourceDefinition, name: "*.platform.warden.dev" }
+    - { group: apiextensions.crossplane.io, kind: Composition }
+    - { group: pkg.crossplane.io,           kind: Function }
+    - { group: rbac.authorization.k8s.io,   kind: ClusterRole, name: "crossplane-compose-*" }
+  namespaceResourceBlacklist:
+    - { group: "*", kind: "*" }   # no namespaced objects: crossplane-system is exempt from image verification

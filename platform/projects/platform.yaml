@@ -1,0 +1,49 @@
+# AppProject for the Helm chart Applications (clusters/<name>/platform.yaml; hub ADR-029). Charts install CRDs,
+# webhooks and cluster RBAC, so this project is powerful by nature. It is limited to the pinned chart repos, the
+# chart namespaces, and the cluster-scoped kinds the charts use (measured on kind, 2026-10-25).
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  description: Platform Helm charts (versions pinned in the hub's versions.yaml)
+  sourceRepos:
+    - https://argoproj.github.io/argo-helm
+    - https://kyverno.github.io/kyverno
+    - docker.io/envoyproxy
+    - https://prometheus-community.github.io/helm-charts
+    - https://cloudnative-pg.github.io/charts
+    - https://charts.crossplane.io/stable
+    - https://grafana.github.io/helm-charts
+    - https://kubernetes-sigs.github.io/metrics-server/
+    - https://github.com/WARDEN-CCD/warden-gitops.git   # $values source
+  destinations:
+    - { server: https://kubernetes.default.svc, namespace: argocd }
+    - { server: https://kubernetes.default.svc, namespace: argo-rollouts }
+    - { server: https://kubernetes.default.svc, namespace: kyverno }
+    - { server: https://kubernetes.default.svc, namespace: envoy-gateway-system }
+    - { server: https://kubernetes.default.svc, namespace: monitoring }
+    - { server: https://kubernetes.default.svc, namespace: cnpg-system }
+    - { server: https://kubernetes.default.svc, namespace: crossplane-system }
+    - { server: https://kubernetes.default.svc, namespace: k6-operator-system }
+    - { server: https://kubernetes.default.svc, namespace: kube-system }   # metrics-server; kube-prometheus-stack Services
+  clusterResourceWhitelist:
+    - { group: apiextensions.k8s.io,         kind: CustomResourceDefinition }
+    - { group: rbac.authorization.k8s.io,    kind: ClusterRole }
+    - { group: rbac.authorization.k8s.io,    kind: ClusterRoleBinding }
+    - { group: admissionregistration.k8s.io, kind: MutatingWebhookConfiguration }
+    - { group: admissionregistration.k8s.io, kind: ValidatingWebhookConfiguration }
+    - { group: admissionregistration.k8s.io, kind: ValidatingAdmissionPolicy }          # envoy-gateway
+    - { group: admissionregistration.k8s.io, kind: ValidatingAdmissionPolicyBinding }
+    - { group: apiregistration.k8s.io,       kind: APIService }                         # metrics-server
+    # CreateNamespace + managedNamespaceMetadata applies each chart's Namespace on every sync.
+    - { group: "", kind: Namespace, name: argocd }
+    - { group: "", kind: Namespace, name: argo-rollouts }
+    - { group: "", kind: Namespace, name: kyverno }
+    - { group: "", kind: Namespace, name: envoy-gateway-system }
+    - { group: "", kind: Namespace, name: monitoring }
+    - { group: "", kind: Namespace, name: cnpg-system }
+    - { group: "", kind: Namespace, name: crossplane-system }
+    - { group: "", kind: Namespace, name: k6-operator-system }
+    - { group: "", kind: Namespace, name: kube-system }

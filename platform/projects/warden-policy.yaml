@@ -1,0 +1,23 @@
+# AppProject for the `policies` Application (hub ADR-029): admission policies from warden-policy, nothing else.
+# Kinds are the ones the Application manages on kind (2026-10-25). Names are pinned to `warden-*` so the policy repo
+# cannot overwrite admission objects that charts own (Envoy Gateway ships its own ValidatingAdmissionPolicy).
+# The first break-glass PolicyException (ADR-020) needs a namespaced entry and its namespace here.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: warden-policy
+  namespace: argocd
+spec:
+  description: Admission policies from warden-policy
+  sourceRepos:
+    - https://github.com/WARDEN-CCD/warden-policy.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: kyverno
+  clusterResourceWhitelist:
+    - { group: admissionregistration.k8s.io, kind: ValidatingAdmissionPolicy,        name: "warden-*" }
+    - { group: admissionregistration.k8s.io, kind: ValidatingAdmissionPolicyBinding, name: "warden-*" }
+    - { group: policies.kyverno.io,          kind: ImageValidatingPolicy,            name: "warden-*" }
+    - { group: policies.kyverno.io,          kind: ValidatingPolicy,                 name: "warden-*" }
+  namespaceResourceBlacklist:
+    - { group: "*", kind: "*" }   # no namespaced objects: kyverno is exempt from image verification

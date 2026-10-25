@@ -1,0 +1,21 @@
+# AppProject for the `gateway` and `<cluster>-config` Applications (hub ADR-029): this repo's own cluster
+# configuration. AppProjects and ApplicationSets are not here but in project `root`.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: warden-gitops
+  namespace: argocd
+spec:
+  description: Gateway and per-cluster configuration from warden-gitops
+  sourceRepos:
+    - https://github.com/WARDEN-CCD/warden-gitops.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: argocd                 # destination of <cluster>-config; its objects name their own namespace
+    - server: https://kubernetes.default.svc
+      namespace: envoy-gateway-system
+  clusterResourceWhitelist:
+    - { group: gateway.networking.k8s.io, kind: GatewayClass }
+  namespaceResourceWhitelist:
+    - { group: gateway.networking.k8s.io, kind: Gateway }
+    - { group: gateway.envoyproxy.io,     kind: EnvoyProxy }

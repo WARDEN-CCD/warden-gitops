@@ -1,0 +1,21 @@
+# AppProject for the `observability` and `load` Applications (hub ADR-029): canary analysis, dashboards and k6 load
+# from warden-platform. Kinds are the ones those Applications manage on kind (2026-10-25).
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: warden-platform
+  namespace: argocd
+spec:
+  description: AnalysisTemplates, dashboards and k6 load from warden-platform
+  sourceRepos:
+    - https://github.com/WARDEN-CCD/warden-platform.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: monitoring
+    - server: https://kubernetes.default.svc
+      namespace: k6-operator-system
+  clusterResourceWhitelist:
+    - { group: argoproj.io, kind: ClusterAnalysisTemplate, name: "warden-*" }
+  namespaceResourceWhitelist:
+    - { group: "",    kind: ConfigMap }   # Grafana dashboards (monitoring), k6 script (k6-operator-system)
+    - { group: k6.io, kind: TestRun }

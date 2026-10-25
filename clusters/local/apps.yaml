@@ -28,6 +28,18 @@ spec:
       destination:
         server: https://kubernetes.default.svc
         namespace: "svc-{{ .path.basename }}"
+      # Argo Rollouts owns two fields during a rollout (ADR-012): the pod-template hash in the stable/canary
+      # Service selectors, and the HTTPRoute backend weights (Gateway API plugin). Both are atomic, so a forced
+      # server-side apply would put Git's values back mid-rollout and split traffic by pod count instead of weight.
+      ignoreDifferences:
+        - group: ""
+          kind: Service
+          jsonPointers:
+            - /spec/selector/rollouts-pod-template-hash
+        - group: gateway.networking.k8s.io
+          kind: HTTPRoute
+          jsonPointers:
+            - /spec/rules/0/backendRefs
       syncPolicy:
         automated:
           prune: true
@@ -35,6 +47,7 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+          - RespectIgnoreDifferences=true
         retry:
           limit: 5
           backoff:

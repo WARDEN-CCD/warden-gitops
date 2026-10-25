@@ -1,5 +1,6 @@
 # AppProject for service Applications (apps/*). A service directory can only deploy namespaced workload kinds
-# into its own svc-* namespace, from this repo. No RBAC objects, no cluster-scoped kinds except its Namespace.
+# into its own svc-* namespace, from this repo. No RBAC objects, no cluster-scoped kinds except its Namespace,
+# which must be named svc-* (hub ADR-029): a service directory cannot relabel a platform namespace.
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -15,6 +16,7 @@ spec:
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
+      name: "svc-*"
   namespaceResourceBlacklist:
     - group: rbac.authorization.k8s.io
       kind: Role

@@ -1,0 +1,18 @@
+# Argo CD's built-in `default` project, locked (hub ADR-029). Argo CD creates it allowing every repo, namespace and
+# kind, so an Application that forgot `project:` would get all of that. Now such an Application is rejected.
+# Never prune or delete it: the Argo CD API server recreates a missing `default` fully open when it starts.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  description: Locked. Every Application names its own project (hub ADR-029).
+  sourceRepos: []
+  sourceNamespaces: []
+  destinations: []
+  clusterResourceWhitelist: []   # explicit: server-side apply takes over the '*' Argo CD set at creation
+  namespaceResourceBlacklist:
+    - { group: "*", kind: "*" }

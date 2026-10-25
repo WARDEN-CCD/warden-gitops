@@ -1,6 +1,8 @@
 # Git-sourced configuration for the kind cluster. Each repo owns its content (hub DESIGN §8, ADR-001);
 # this repo only points at it. Custom resources whose CRDs come from the platform charts are applied with
-# SkipDryRunOnMissingResource and retried until those CRDs exist.
+# SkipDryRunOnMissingResource and retried until those CRDs exist. Each element names its AppProject
+# (platform/projects/<project>.yaml, hub ADR-029): one per source repo, so a repo cannot pick or widen its own.
+# No CreateNamespace: the namespaces come from the platform charts, and config projects may not write Namespaces.
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -12,13 +14,13 @@ spec:
   generators:
     - list:
         elements:
-          - { name: policies,       repo: warden-policy,   path: policies,              namespace: kyverno }
-          - { name: crossplane-api, repo: warden-infra,    path: crossplane,            namespace: crossplane-system }
-          - { name: observability,  repo: warden-platform, path: observability,         namespace: monitoring }
-          - { name: gateway,        repo: warden-gitops,   path: platform/gateway,      namespace: envoy-gateway-system }
-          - { name: projects,       repo: warden-gitops,   path: platform/projects,     namespace: argocd }
-          - { name: load,           repo: warden-platform, path: load,                  namespace: k6-operator-system }
-          - { name: local-config,   repo: warden-gitops,   path: clusters/local/config, namespace: argocd }
+          - { name: policies,       repo: warden-policy,   path: policies,              namespace: kyverno,              project: warden-policy }
+          - { name: crossplane-api, repo: warden-infra,    path: crossplane,            namespace: crossplane-system,    project: warden-infra }
+          - { name: observability,  repo: warden-platform, path: observability,         namespace: monitoring,           project: warden-platform }
+          - { name: gateway,        repo: warden-gitops,   path: platform/gateway,      namespace: envoy-gateway-system, project: warden-gitops }
+          - { name: projects,       repo: warden-gitops,   path: platform/projects,     namespace: argocd,               project: root }
+          - { name: load,           repo: warden-platform, path: load,                  namespace: k6-operator-system,   project: warden-platform }
+          - { name: local-config,   repo: warden-gitops,   path: clusters/local/config, namespace: argocd,               project: warden-gitops }
   template:
     metadata:
       name: "{{ .name }}"
@@ -26,7 +28,7 @@ spec:
       labels:
         warden.dev/layer: config
     spec:
-      project: default
+      project: "{{ .project }}"
       source:
         repoURL: "https://github.com/WARDEN-CCD/{{ .repo }}.git"
         targetRevision: main
@@ -42,7 +44,6 @@ spec:
           prune: true
           selfHeal: true
         syncOptions:
-          - CreateNamespace=true
           - ServerSideApply=true
           - SkipDryRunOnMissingResource=true
         retry:

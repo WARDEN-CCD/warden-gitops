@@ -1,0 +1,23 @@
+# AppProject for the root Application and the `projects` Application (hub ADR-029). Only this repo may create
+# ApplicationSets and AppProjects, so no other source can choose or widen its own project.
+# bootstrap/root-*.yaml applies a copy of this object before the root Application, which cannot sync without its
+# project. Keep the copies equal (hub scripts/verify.py checks).
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: root
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false   # deleting it would strand the root Application
+spec:
+  description: Root Application and the AppProjects (warden-gitops only)
+  sourceRepos:
+    - https://github.com/WARDEN-CCD/warden-gitops.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: argocd
+  # No clusterResourceWhitelist: no cluster-scoped kinds.
+  namespaceResourceWhitelist:
+    - { group: argoproj.io, kind: ApplicationSet }
+    - { group: argoproj.io, kind: AppProject }
+    - { group: "",          kind: Secret }   # Argo CD repository entries (clusters/<name>/repo-*.yaml)

@@ -19,6 +19,10 @@ spec:
       namespace: argocd
       labels:
         warden.dev/layer: apps
+      annotations:
+        # DORA ledger (ADR-019): platform/argocd/values.yaml defines these triggers and the GitHub notifier.
+        notifications.argoproj.io/subscribe.warden-deployed.github: ""
+        notifications.argoproj.io/subscribe.warden-degraded.github: ""
     spec:
       project: apps          # platform/projects/apps.yaml: svc-* namespaces only, no RBAC kinds
       source:

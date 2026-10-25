@@ -21,5 +21,42 @@ configs:
         - .webhooks[]?.clientConfig.caBundle
 dex:
   enabled: false
+# DORA ledger (ADR-019): one GitHub Deployment on warden-gitops per service revision, environment = the
+# Application name, final state success (Synced + Healthy) or failure (Degraded, e.g. an aborted canary).
+# `warden dora` reads exactly this. Credentials: the warden-ccd-deployments GitHub App, loaded out of band into
+# argocd-notifications-secret by warden-infra scripts/bootstrap_secrets.py; without it the controller only logs.
 notifications:
-  enabled: false                     # switched on with the DORA ledger (ADR-019)
+  enabled: true
+  secret:
+    create: false                    # never in Git (CLAUDE.md rule 8)
+  notifiers:
+    service.github: |
+      appID: $github-appID
+      installationID: $github-installationID
+      privateKey: $github-privateKey
+  templates:
+    template.warden-deployed: |
+      github:
+        deployment:
+          state: success
+          environment: "{{.app.metadata.name}}"
+          requiredContexts: []
+          autoMerge: false
+          transientEnvironment: false
+    template.warden-degraded: |
+      github:
+        deployment:
+          state: failure
+          environment: "{{.app.metadata.name}}"
+          requiredContexts: []
+          autoMerge: false
+          transientEnvironment: false
+  triggers:
+    trigger.warden-deployed: |
+      - when: app.status.operationState != nil and app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
+        oncePer: app.status.operationState.syncResult.revision
+        send: [warden-deployed]
+    trigger.warden-degraded: |
+      - when: app.status.health.status == 'Degraded'
+        oncePer: app.status.sync.revision
+        send: [warden-degraded]

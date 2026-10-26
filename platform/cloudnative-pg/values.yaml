@@ -1,0 +1,8 @@
+# Pin the operator image by digest (non-negotiable 1). The operator also hands this exact reference to the
+# bootstrap init container of every PostgreSQL pod it creates, so the pods' admission check (VAP
+# warden-image-references-pods: T01 digest, T06 registry carve-out in warden-policy) sees a digest, not a tag.
+# Keep the tag equal to versions.yaml charts.cloudnative-pg.app and the digest equal to the one trusted in
+# warden-policy/policies/admission/vap-image-references.yaml (scripts/verify.py checks both). The chart has no
+# `digest` value (0.29.1); a tag field carrying `tag@digest` renders the Deployment image and OPERATOR_IMAGE_NAME alike.
+image:
+  tag: "1.30.1@sha256:923c267ec29636db3bee20f993d0ec4973fa22998e1adad37da79e4d32b5bc07"

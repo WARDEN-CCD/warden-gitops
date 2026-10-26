@@ -56,7 +56,9 @@ notifications:
       - when: app.status.operationState != nil and app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
         oncePer: app.status.operationState.syncResult.revision
         send: [warden-deployed]
+    # Keyed to the revision that was synced, not app.status.sync.revision: that one is the repo's HEAD and moves on
+    # every other service's promotion, which would record the same failed release again and again.
     trigger.warden-degraded: |
-      - when: app.status.health.status == 'Degraded'
-        oncePer: app.status.sync.revision
+      - when: app.status.operationState != nil and app.status.health.status == 'Degraded'
+        oncePer: app.status.operationState.syncResult.revision
         send: [warden-degraded]

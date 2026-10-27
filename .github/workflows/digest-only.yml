@@ -1,4 +1,4 @@
-# DRAFT — encodes ADR-013; not yet run.
+# Encodes ADR-013. Exercised on every promotion pull request (E1, E3, E5).
 #
 # Required status check on main. For PRs authored by the promotion bot, passes only if the PR changes exactly
 # one image digest in apps/<svc>/rollout.yaml. Human PRs pass this check and go through normal review.

@@ -15,7 +15,8 @@ spec:
     - list:
         elements:
           - { name: policies,       repo: warden-policy,   path: policies,              namespace: kyverno,              project: warden-policy }
-          - { name: crossplane-api, repo: warden-infra,    path: crossplane,            namespace: crossplane-system,    project: warden-infra }
+          - { name: crossplane-api,      repo: warden-infra, path: crossplane/base,            namespace: crossplane-system, project: warden-infra }
+          - { name: crossplane-database, repo: warden-infra, path: crossplane/overlays/local, namespace: crossplane-system, project: warden-infra }
           - { name: observability,  repo: warden-platform, path: observability,         namespace: monitoring,           project: warden-platform }
           - { name: gateway,        repo: warden-gitops,   path: platform/gateway,      namespace: envoy-gateway-system, project: warden-gitops }
           - { name: projects,       repo: warden-gitops,   path: platform/projects,     namespace: argocd,               project: root }

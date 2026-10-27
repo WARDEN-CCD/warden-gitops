@@ -28,7 +28,7 @@ dex:
 notifications:
   enabled: true
   secret:
-    create: false                    # never in Git (CLAUDE.md rule 8)
+    create: false                    # bootstrap secret is provided outside Git
   notifiers:
     service.github: |
       appID: $github-appID

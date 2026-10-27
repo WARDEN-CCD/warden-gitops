@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: app
-          image: ghcr.io/warden-ccd/svc-books@sha256:084f79facf2bda788923ef3bac78c28a797d1ce7a25f1202f8ea47a12a74ef4d
+          image: ghcr.io/warden-ccd/svc-books@sha256:bbec55c62b38d1f3858c66091a2853d5c9cb72871e331903b1fbaf84d2b6256c
           ports:
             - name: http
               containerPort: 8080

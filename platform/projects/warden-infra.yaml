@@ -1,5 +1,5 @@
 # AppProject for the Crossplane API and backend Applications (hub ADR-029): resources from warden-infra.
-# The Azure provider and ProviderConfig are allowed only from this source repository.
+# The Azure provider and cluster-scoped provider configuration are allowed only from this source repository.
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -17,7 +17,7 @@ spec:
     - { group: apiextensions.crossplane.io, kind: Composition }
     - { group: pkg.crossplane.io,           kind: Function }
     - { group: pkg.crossplane.io,           kind: Provider }
-    - { group: azure.upbound.io,            kind: ProviderConfig }
+    - { group: azure.m.upbound.io,          kind: ClusterProviderConfig }
     - { group: rbac.authorization.k8s.io,   kind: ClusterRole, name: "crossplane-compose-*" }
   namespaceResourceBlacklist:
     - { group: "*", kind: "*" }   # no namespaced objects: crossplane-system is exempt from image verification
